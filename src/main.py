@@ -1,24 +1,8 @@
-from sqlalchemy import Float, Text
 from data_handler import DataHandler
+from schema.index import table_training, table_test, table_ideal
 
 # Initialize data handler
 db_handler = DataHandler()
-
-# Define training table
-table_training = {'x': Float}
-table_training.update({f'y{i}': Float for i in range(1, 5)})
-
-# Define test table
-table_test = {
-    'x': Float,
-    'y1': Float,
-    'delta_y': Float,
-    'ideal_func': Text
-}
-
-# Define ideal table
-table_ideal = {'x': Float}
-table_ideal.update({f'y{i}': Float for i in range(1, 51)})
 
 
 # Create tables
