@@ -9,38 +9,28 @@ class DataAnalyzer(DataHandler):
         self.best_fits = {}
         self.min_mse = np.inf
 
-    def find_best_fit(self, train_table='train', ideal_table='ideal'):
-        train_data = self.get_data_from_db(f'SELECT * FROM {train_table}')
-        ideal_data = self.get_data_from_db(f'SELECT * FROM {ideal_table}')
+    def find_best_fit(train_set: np.array, ideal_set: np.array):
+        y_train = train_set[:, 1]  # Extract y values
 
-        for x in train_data['x'].unique():
-            self.best_fits[x] = []
-            train_data_x = train_data[train_data['x'] == x]
+        best_curve = None
+        lowest_mse = float('inf')
 
-            for i in range(1, 5):
-               best_fit = None
-               self.min_mse = np.inf
+        for curve in ideal_set:
+            if len(curve) != len(train_set):
+                continue  # Skip this curve if it's not the same length as the train set
 
-               for j in range(1, 51):
-                    mse = mean_squared_error(train_data_x[f'y{i}'], ideal_data[ideal_data['x'] == x][f'y{j}'])
-                    if mse < self.min_mse:
-                        self.min_mse = mse
-                        best_fit = j
-            self.best_fits[x].append(best_fit)
-        test_data = self.get_data_from_db(f'SELECT * FROM {test_table}')
+            y_curve = curve[:, 1]  # Extract y values
 
-        for best_fit in self.best_fits:
-            ideal_data = self.get_data_from_db(f'SELECT y{best_fit} FROM ideal')
-            mse = mean_squared_error(test_data['y1'], ideal_data[f'y{best_fit}'])
-            if mse > np.sqrt(2) * self.min_mse:
-                print(f'Test dataset does not match the ideal function {best_fit}.')
+            # Compute the MSE between the y values of the curve and the training set
+            mse = mean_squared_error(y_train, y_curve)
 
-    def save_deviation(self, test_table='test'):
-        test_data = self.get_data_from_db(f'SELECT * FROM {test_table}')
-        for best_fit in self.best_fits:
-            ideal_data = self.get_data_from_db(f'SELECT y{best_fit} FROM ideal')
-            deviation = test_data['y1'] - ideal_data[f'y{best_fit}']
-            self.get_data_from_db(f'UPDATE {test_table} SET delta_y = {deviation} WHERE ideal_func = "Funk{best_fit}"')
+            if mse < lowest_mse:
+                best_curve = curve
+                lowest_mse = mse
 
-            # For each x pos 
+        return best_curve, lowest_mse
+
+    def save_deviation(self):
+        return
+        
 
