@@ -27,8 +27,6 @@ class DataAnalyzer(DataHandler):
                         self.min_mse = mse
                         best_fit = j
             self.best_fits[x].append(best_fit)
-
-    def validate_selection(self, test_table='test'):
         test_data = self.get_data_from_db(f'SELECT * FROM {test_table}')
 
         for best_fit in self.best_fits:
@@ -43,3 +41,6 @@ class DataAnalyzer(DataHandler):
             ideal_data = self.get_data_from_db(f'SELECT y{best_fit} FROM ideal')
             deviation = test_data['y1'] - ideal_data[f'y{best_fit}']
             self.get_data_from_db(f'UPDATE {test_table} SET delta_y = {deviation} WHERE ideal_func = "Funk{best_fit}"')
+
+            # For each x pos 
+
